@@ -1,8 +1,10 @@
 INCLUDEPATH += $$PWD
 
-SOURCES += $$PWD/QLogger.cpp \
+SOURCES += \
+    $$PWD/QLogger.cpp \
     $$PWD/QLoggerWriter.cpp
 
-HEADERS += $$PWD/QLogger.h \
+HEADERS += \
+    $$PWD/QLogger.h \
     $$PWD/QLoggerLevel.h \
     $$PWD/QLoggerWriter.h

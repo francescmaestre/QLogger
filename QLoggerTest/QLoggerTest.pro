@@ -15,8 +15,8 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
+## Static Imports
 !build_pass:message("QLoggerTest: importing QLogger")
-if( !include($$PWD/../QLogger.pri) ) {
+if (!include($$PWD/../QLogger.pri)) {
     error( Could not find the QLogger.pri file. )
 }

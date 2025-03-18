@@ -228,8 +228,9 @@ void QLoggerWriter::enqueue(const QDateTime &date, const QString &threadId, cons
 
 void QLoggerWriter::run()
 {
-   if (!mQuit)
+   if (!mQuit && mMessages.isEmpty())
    {
+      // qInfo("Early waiting");
       QMutexLocker locker(&mutex);
       mQueueNotEmpty.wait(&mutex);
    }
@@ -247,6 +248,7 @@ void QLoggerWriter::run()
 
       if (!mQuit)
       {
+         // qInfo("Waiting");
          QMutexLocker locker(&mutex);
          mQueueNotEmpty.wait(&mutex);
       }
