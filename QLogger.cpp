@@ -14,8 +14,48 @@ Q_DECLARE_METATYPE(QLogger::LogMode)
 Q_DECLARE_METATYPE(QLogger::LogFileDisplay)
 Q_DECLARE_METATYPE(QLogger::LogMessageDisplay)
 
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+uint qGlobalPostedEventsCount(); // Exported in Qt but not declared
+#else
+// FIXME qGlobalPostedEventsCount is no more exported
+#endif
+
 namespace QLogger
 {
+
+//! @link https://stackoverflow.com/questions/44440584/how-to-monitor-qt-signal-event-queue-depth
+int postedEventsCountForPublic(QObject * target, int timeout = 1000) {
+    uint count = 0;
+    QMutex mutex;
+    struct Event : QEvent {
+        QMutex& mutex;
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        QMutexLocker lock;
+    #else
+        QMutexLocker<QMutex> lock;
+    #endif
+        uint & count;
+        Event(QMutex & mutex, uint & count) :
+           QEvent(QEvent::None), mutex(mutex), lock(&mutex), count(count) {}
+        ~Event() {
+        #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+           count = qGlobalPostedEventsCount();
+        #else
+           // FIXME Qt6 doesn't export qGlobalPostedEventsCount
+        #endif
+        }
+    };
+    QCoreApplication::postEvent(target, new Event(mutex, count), INT_MAX);
+    if (mutex.tryLock(timeout)) {
+        mutex.unlock();
+        return int(count);
+    }
+    return -1;
+}
+
+
+
 
 void QLog_(const QString &module, LogLevel level, const QString &message,
            const QString &function, const QString &file, int line)
@@ -350,6 +390,14 @@ void QLoggerManager::overwriteMaxFileSize(int maxSize)
 
 void QLoggerManager::closeLogger()
 {
+   // TODO Test with invokeMethod implementation
+   int l_count = postedEventsCountForPublic(getInstance());
+
+   while (l_count > 0) {
+       qDebug() << "# postedEventsCount =" << l_count;
+       l_count = postedEventsCountForPublic(getInstance());
+   }
+   qDebug() << "# End: postedEventsCount =" << l_count;
 
    QVector<QString> oldFiles;
    { 
