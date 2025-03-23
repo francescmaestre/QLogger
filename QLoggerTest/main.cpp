@@ -128,10 +128,12 @@ int main(int argc, char *argv[])
     QLog_Info(g_module5, QStringLiteral("\n---- Close Logger ----\n"));
     QLog_Info(g_module6, QStringLiteral("\n---- Close Logger ----\n"));
 
+    QLoggerManager::getInstance()->closeLogger();
 
     // --- End ---
     QTimer::singleShot(2500, &a, []() {
         qInfo() << "# Done.";
+        QLoggerManager::getInstance()->deleteLogger();
         exit(0);
     });
 

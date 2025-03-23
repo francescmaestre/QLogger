@@ -36,15 +36,26 @@ class QLoggerWriter;
 /**
  * @brief The QLoggerManager class manages the different destination files that we would like to have.
  */
-class QLoggerManager
+class QLoggerManager : public QObject
 {
+   Q_OBJECT
+
 public:
    /**
     * @brief Gets an instance to the QLoggerManager.
     * @return A pointer to the instance.
     */
    static QLoggerManager *getInstance();
-
+   /**
+    * @brief Gets an instance to the QLoggerManager's thread.
+    * @return A pointer to the thread object.
+    */
+   static QThread *getInstanceThread();                           
+   /**
+    * @brief instanceIsAlive
+    * @return True if INSTANCE is not null.
+    */
+   static bool instanceIsAlive(); 
    /**
     * @brief This method creates a QLoogerWriter that stores the name of the file and the log
     * level assigned to it. Here is added to the map the different modules assigned to each
@@ -142,6 +153,17 @@ public:
     * @brief resume Resumes all QLoggerWriters that where paused.
     */
    void resume();
+   
+   /**
+    * @brief This method closes the logger and the thread it represents.
+    * @note Can be blocking.
+    */
+   void closeLogger();
+
+   /**
+    * @brief This function deletes the instance to the QLoggerManager.
+    */
+   static void deleteLogger();   
 
    /**
     * @brief getDefaultFileDestinationFolder Gets the default file destination folder.
@@ -240,7 +262,7 @@ private:
    /**
     * @brief Default builder of the class. It starts the thread.
     */
-   QLoggerManager() = default;
+   QLoggerManager();
 
    /**
     * @brief Destructor
@@ -268,6 +290,26 @@ private:
     * @param module The module to dequeue the messages from
     */
    void writeAndDequeueMessages(const QString &module);
+   
+signals:
+   void _startEnqueueMessage(const QString &module, QLogger::LogLevel level, const QString &message, const QString &function, 
+                             const QString& file, int line, const QString& threadId);
+
+private slots:
+   /**
+    * @brief enqueueMessage Enqueues a message in the corresponding QLoggerWritter. This method is run on
+    * the QLogger's thread.
+    *
+    * @param module The module that writes the message.
+    * @param level The level of the message.
+    * @param message The message to log.
+    * @param function The function in the file where the log comes from.
+    * @param file The file that logs.
+    * @param line The line in the file where the log comes from.
+    * @param threadId The thread ID.
+    */
+   void _enqueueMessage(const QString &module, QLogger::LogLevel level, const QString &message, const QString &function, 
+                        const QString &file, int line, const QString &threadId);
 };
 
 /**
