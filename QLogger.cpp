@@ -130,6 +130,29 @@ void QLoggerManager::clearFileDestinationFolder(const QString &fileFolderDestina
    }
 }
 
+/**
+ * @public static
+ */
+void QLoggerManager::initializeLoggerConsole(LogLevel level, bool debugModeOnly)
+{
+    // Setup QLogger
+    auto l_manager = QLoggerManager::getInstance();
+    l_manager->setDefaultFileSuffixIfFull(LogFileDisplay::Number);
+    l_manager->setDefaultMessageOptions(LogMessageDisplay::Default3);   ///< Not display Function, File and Line
+    // Default mode
+    if (debugModeOnly) {
+    #ifdef QT_DEBUG
+        l_manager->setDefaultMode(LogMode::OnlyConsole);                ///< Messages are only displayed in console
+    #else
+        l_manager->setDefaultMode(LogMode::Disabled);
+    #endif
+    } else {
+        l_manager->setDefaultMode(LogMode::OnlyConsole);                ///< Messages are only displayed in console
+    }
+    // Default level
+    l_manager->setDefaultLevel(level);
+}
+
 
 LogLevel QLoggerManager::getModuleLevel(const QString &module)
 {
@@ -218,6 +241,9 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
       const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QLatin1Char('0'));
       const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
 
+      if (mDefaultMode != LogMode::OnlyFile) {
+        qWarning().noquote().nospace() << "No module for message [" << module << "][" << message << "]";
+      }
       mNonWriterQueue.insert(module,
                              { QDateTime::currentDateTime(), threadId, QVariant::fromValue<LogLevel>(level), function,
                                fileName, line, message });
