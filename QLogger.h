@@ -188,7 +188,7 @@ private:
    /**
     * @brief Defines the queue of messages when no writers have been set yet.
     */
-   QMultiMap<QString, QVector<QVariant>> mNonWriterQueue;
+   QMultiMap<QString, QVector<QVariant> > mNonWriterQueue;
 
    /**
     * @brief Default values for QLoggerWritter parameters. Useful for multiple QLoggerWritter.
@@ -269,8 +269,9 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  * @param message The message.
  */
 #   define QLog_Trace(module, message)                                                                                 \
-      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Trace, message, __FUNCTION__,  \
-                                                             __FILE__, __LINE__)
+      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Trace, message,                \
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
 #ifndef QLog_Debug
@@ -280,8 +281,9 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  * @param message The message.
  */
 #   define QLog_Debug(module, message)                                                                                 \
-      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Debug, message, __FUNCTION__,  \
-                                                             __FILE__, __LINE__)
+      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Debug, message,                \
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
 #ifndef QLog_Info
@@ -291,8 +293,9 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  * @param message The message.
  */
 #   define QLog_Info(module, message)                                                                                  \
-      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Info, message, __FUNCTION__,   \
-                                                             __FILE__, __LINE__)
+      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Info, message,                 \
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
 #ifndef QLog_Warning
@@ -303,7 +306,8 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  */
 #   define QLog_Warning(module, message)                                                                               \
       QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Warning, message,              \
-                                                             __FUNCTION__, __FILE__, __LINE__)
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
 #ifndef QLog_Error
@@ -313,8 +317,9 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  * @param message The message.
  */
 #   define QLog_Error(module, message)                                                                                 \
-      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Error, message, __FUNCTION__,  \
-                                                             __FILE__, __LINE__)
+      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Error, message,                \
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
 #ifndef QLog_Fatal
@@ -324,6 +329,7 @@ extern void QLog_(const QString &module, QLogger::LogLevel level, const QString 
  * @param message The message.
  */
 #   define QLog_Fatal(module, message)                                                                                 \
-      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Fatal, message, __FUNCTION__,  \
-                                                             __FILE__, __LINE__)
+      QLogger::QLoggerManager::getInstance()->enqueueMessage(module, QLogger::LogLevel::Fatal, message,                \
+                                                             QString::fromLatin1(__FUNCTION__),                        \
+                                                             QString::fromLatin1(__FILE__), __LINE__)
 #endif

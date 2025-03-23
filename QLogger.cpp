@@ -100,8 +100,8 @@ void QLoggerManager::startWriter(const QString &module, QLoggerWriter *log, LogM
 {
    if (notify)
    {
-      const auto threadId = QString("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QChar('0'));
-      log->enqueue(QDateTime::currentDateTime(), threadId, module, LogLevel::Info, "", "", -1, "Adding destination!");
+      const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QLatin1Char('0'));
+      log->enqueue(QDateTime::currentDateTime(), threadId, module, LogLevel::Info, QString(), QString(), -1, QStringLiteral("Adding destination!"));
    }
 
    if (mode != LogMode::Disabled)
@@ -175,8 +175,8 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
 
    if (isLogEnabled && logWriter->getLevel() <= level)
    {
-      const auto threadId = QString("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QChar('0'));
-      const auto fileName = file.mid(file.lastIndexOf('/') + 1);
+      const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QLatin1Char('0'));
+      const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
 
       writeAndDequeueMessages(module);
 
@@ -184,8 +184,8 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
    }
    else if (!logWriter && mNonWriterQueue.count(module) < QUEUE_LIMIT)
    {
-      const auto threadId = QString("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QChar('0'));
-      const auto fileName = file.mid(file.lastIndexOf('/') + 1);
+      const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE * 2, 16, QLatin1Char('0'));
+      const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
 
       mNonWriterQueue.insert(module,
                              { QDateTime::currentDateTime(), threadId, QVariant::fromValue<LogLevel>(level), function,
@@ -276,14 +276,16 @@ QLoggerManager::~QLoggerManager()
          for (const auto &filePath : std::as_const(entryList))
          {
             auto destination = mNewLogsFolder;
-            if (!destination.endsWith("/"))
-               destination.append("/");
-            destination.append(filePath.split("/").last());
+             if (!destination.endsWith(QLatin1Char('/'))) {
+               destination.append(QLatin1Char('/'));
+             }
+            destination.append(filePath.split(QLatin1Char('/')).last());
 
-            QDir().rename(oldDestination + "/" + filePath, destination);
+            QDir().rename(oldDestination + QLatin1Char('/') + filePath, destination);
 
-            if (dir.isEmpty())
+            if (dir.isEmpty()) {
                dir.removeRecursively();
+            }
          }
       }
    }
