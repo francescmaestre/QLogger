@@ -92,6 +92,25 @@ public:
     */
    static void clearFileDestinationFolder(const QString &fileFolderDestination, int days = -1);
    /**
+    * @brief Gets the QLoggerWriter's level corresponding to the module <em>module</em>.
+    * @param module The module we look for.
+    * @return Returns the log level of the module, Default (-1) is returned if not found.
+    */
+   LogLevel getModuleLevel(const QString &module);
+   /**
+    * @brief Sets the QLoggerWriter's level corresponding to the module <em>module</em>.
+    * @param module The module we look for.
+    * @param level The level to apply to the module.
+    */
+   void setModuleLogLevel(const QString &module, LogLevel level);
+   /**
+    * @brief Gets the QLoggerWriter's file destination corresponding to the module <em>module</em>.
+    * @param module The module we look for.
+    * @return Returns the file destination of the module or empty if not found.
+    */
+   QString getModuleFileDestination(const QString &module);
+
+   /**
     * @brief enqueueMessage Enqueues a message in the corresponding QLoggerWritter.
     * @param module The module that writes the message.
     * @param level The level of the message.

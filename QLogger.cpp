@@ -130,6 +130,37 @@ void QLoggerManager::clearFileDestinationFolder(const QString &fileFolderDestina
    }
 }
 
+
+LogLevel QLoggerManager::getModuleLevel(const QString &module)
+{
+   QMutexLocker lock(&mMutex);
+   auto* l_logWriter = mModuleDest.value(module, nullptr);
+   if (l_logWriter) {
+      return l_logWriter->getLevel();
+   }
+   return LogLevel::Default;
+}
+
+void QLoggerManager::setModuleLogLevel(const QString &module, LogLevel level)
+{
+   QMutexLocker lock(&mMutex);
+   auto* l_logWriter = mModuleDest.value(module, nullptr);
+   if (l_logWriter) {
+       l_logWriter->setLogLevel(level);
+   }
+}
+
+QString QLoggerManager::getModuleFileDestination(const QString &module)
+{
+   QMutexLocker lock(&mMutex);
+   auto* l_logWriter = mModuleDest.value(module, nullptr);
+   if (l_logWriter) {
+       return l_logWriter->getFileDestination();
+   }
+   return QString();
+}
+
+
 void QLoggerManager::setDefaultFileDestinationFolder(const QString &fileDestinationFolder)
 {
    mDefaultFileDestinationFolder = QDir::fromNativeSeparators(fileDestinationFolder);
