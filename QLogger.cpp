@@ -77,15 +77,15 @@ QLoggerWriter *QLoggerManager::createWriter(const QString &fileDest, LogLevel le
                                             LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const
 {
    const auto lFileDest = fileDest.isEmpty() ? mDefaultFileDestination : fileDest;
-   const auto lLevel = level == LogLevel::Warning ? mDefaultLevel : level;
+   const auto lLevel = level == LogLevel::Default ? mDefaultLevel : level;
    const auto lFileFolderDestination = fileFolderDestination.isEmpty()
        ? mDefaultFileDestinationFolder
        : QDir::fromNativeSeparators(fileFolderDestination);
-   const auto lMode = mode == LogMode::OnlyFile ? mDefaultMode : mode;
+   const auto lMode = mode == LogMode::Default ? mDefaultMode : mode;
    const auto lFileSuffixIfFull
-       = fileSuffixIfFull == LogFileDisplay::DateTime ? mDefaultFileSuffixIfFull : fileSuffixIfFull;
+       = fileSuffixIfFull == LogFileDisplay::Default ? mDefaultFileSuffixIfFull : fileSuffixIfFull;
    const auto lMessageOptions
-       = messageOptions.testFlag(LogMessageDisplay::Default) ? mDefaultMessageOptions : messageOptions;
+       = messageOptions == LogMessageDisplays() ? mDefaultMessageOptions : messageOptions;
 
    const auto log
        = new QLoggerWriter(lFileDest, lLevel, lFileFolderDestination, lMode, lFileSuffixIfFull, lMessageOptions);

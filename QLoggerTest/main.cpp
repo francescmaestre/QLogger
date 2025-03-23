@@ -90,14 +90,14 @@ void logCustom2()
     // Create destination with a given file name, default settings but
     // no notificaton about the created module and mode is only file even if default global mode is full
     l_manager->addDestination(g_file1, g_module5, LogLevel::Debug, QString()
-                              , LogMode::OnlyFile, LogFileDisplay::DateTime
+                              , LogMode::OnlyFile, LogFileDisplay::Default
                               , LogMessageDisplay::Default, false);
     QLog_Debug(g_module5, QStringLiteral("This is a debug log message 0-0."));
 
     // Create destination with a given file name, default3 settings but no notificaton about the created module
     l_manager->addDestination(g_file1, g_module6, LogLevel::Debug, QString()
-                              , LogMode::Full, LogFileDisplay::DateTime
-                              , LogMessageDisplay::Default2, false);
+                              , LogMode::Full, LogFileDisplay::Default
+                              , LogMessageDisplay::Default3, false);
     QLog_Debug(g_module6, QStringLiteral("This is a debug log message 0-1."));
 }
 

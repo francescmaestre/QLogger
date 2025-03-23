@@ -60,10 +60,10 @@ public:
     * @param messageOptions Specifies what elements are displayed in one line of log message.
     * @return Returns true if any error have been done.
     */
-   bool addDestination(const QString &fileDest, const QString &module, LogLevel level = LogLevel::Warning,
-                       const QString &fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
-                       LogFileDisplay fileSuffixIfFull = LogFileDisplay::DateTime,
-                       LogMessageDisplays messageOptions = LogMessageDisplay::Default, bool notify = true);
+   bool addDestination(const QString &fileDest, const QString &module, LogLevel level = LogLevel::Default,
+                       const QString &fileFolderDestination = QString(), LogMode mode = LogMode::Default,
+                       LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
+                       LogMessageDisplays messageOptions = LogMessageDisplays(), bool notify = true);
    /**
     * @brief This method creates a QLoogerWriter that stores the name of the file and the log
     * level assigned to it. Here is added to the map the different modules assigned to each
@@ -79,10 +79,10 @@ public:
     * @param messageOptions Specifies what elements are displayed in one line of log message.
     * @return Returns true if any error have been done.
     */
-   bool addDestination(const QString &fileDest, const QStringList &modules, LogLevel level = LogLevel::Warning,
-                       const QString &fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
-                       LogFileDisplay fileSuffixIfFull = LogFileDisplay::DateTime,
-                       LogMessageDisplays messageOptions = LogMessageDisplay::Default, bool notify = true);
+   bool addDestination(const QString &fileDest, const QStringList &modules, LogLevel level = LogLevel::Default,
+                       const QString &fileFolderDestination = QString(), LogMode mode = LogMode::Default,
+                       LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
+                       LogMessageDisplays messageOptions = LogMessageDisplays(), bool notify = true);
    /**
     * @brief Clears old log files from the current storage folder.
     *
