@@ -24,17 +24,18 @@
 
 #include <QLoggerLevel.h>
 
-#include <QThread>
-#include <QWaitCondition>
-#include <QMutex>
 #include <QVector>
+#include <QObject>
 
 namespace QLogger
 {
 
-class QLoggerWriter : public QThread
+/**
+ * @brief The QLoggerWriter class writes the message and manages the file where it is printed.
+ */
+class QLoggerWriter : public QObject
 {
-   Q_OBJECT
+    Q_OBJECT
 
 public:
    /**
@@ -65,7 +66,6 @@ public:
     * @return The level.
     */
    LogMode getMode() const { return mMode; }
-
    /**
     * @brief setLogMode Sets the log mode for this destination.
     * @param mode
@@ -77,19 +77,23 @@ public:
     * @return The level.
     */
    LogLevel getLevel() const { return mLevel; }
-
    /**
     * @brief setLogLevel Sets the log level for this destination.
     * @param level The new level threshold.
     */
    void setLogLevel(LogLevel level) { mLevel = level; }
+   /**
+    * @brief Converts the given level in a QString.
+    * @param level The log level in LogLevel format.
+    * @return The string with the name of the log level.
+    */
+    static QString levelToText(const QLogger::LogLevel &level); 
 
    /**
     * @brief Gets the current max size for the log file.
     * @return The maximum size
     */
    int getMaxFileSize() const { return mMaxFileSize; }
-
    /**
     * @brief setMaxFileSize Sets the max file size for this destination.
     * @param maxSize The new file size
@@ -101,7 +105,6 @@ public:
     * @return The current options
     */
    LogMessageDisplays getMessageOptions() const { return mMessageOptions; }
-
    /**
     * @brief setMessageOptions Specifies what elements are displayed in one line of log message.
     * @param messageOptions The options
@@ -109,7 +112,12 @@ public:
    void setMessageOptions(LogMessageDisplays messageOptions) { mMessageOptions = messageOptions; }
 
    /**
-    * @brief enqueue Enqueues a message to be written in the destination.
+    * @brief write Writes in the destination.
+    * @details Within this method the message is written in the log file. If it would exceed
+    * from mMaxFileSize, another file will be created and the log message will be stored in the
+    * new one. The older file will be renamed with the date and time of this message to know
+    * where it is updated.
+    *
     * @param date The date and time of the log message.
     * @param threadId The thread where the message comes from.
     * @param module The module that writes the message.
@@ -119,44 +127,53 @@ public:
     * @param line The line of the file name that prints the log.
     * @param message The message to log.
     */
-   void enqueue(const QDateTime &date, const QString &threadId, const QString &module, LogLevel level,
-                const QString &function, const QString &fileName, int line, const QString &message);
+   void write(const QDateTime &date, const QString &threadId, const QString &module, LogLevel level,
+              const QString &function, const QString &fileName, int line, const QString &message);
 
    /**
     * @brief Stops the log writer
     * @param stop True to be stop, otherwise false
     */
    void stop(bool stop) { mIsStop = stop; }
-
    /**
     * @brief Returns if the log writer is stop from writing.
     * @return True if is stop, otherwise false
     */
    bool isStop() const { return mIsStop; }
 
-   /**
-    * @brief run Overloaded method from QThread used to wait for new messages.
-    */
-   void run() override;
-
-   /**
-    * @brief closeDestination Closes the destination. This needs to be called whenever
-    */
-   void closeDestination();
-
 private:
-   bool mQuit = false;
-   bool mIsStop = false;
-   QWaitCondition mQueueNotEmpty;
+   /**
+    * @brief Path and folder of the file that will store the logs.
+    */
    QString mFileDestinationFolder;
+   /**
+    * @brief Path and name of the file that will store the logs.
+    */
    QString mFileDestination;
+   /**
+    * @brief The file suffix to append to the file name if full.
+    */
    LogFileDisplay mFileSuffixIfFull;
+   /**
+    * @brief The current logging mode.
+    */
    LogMode mMode;
+   /**
+    * @brief Maximum log level allowed for the file.
+    */
    LogLevel mLevel;
+   /**
+    * @brief The maximum file size.
+    */
    int mMaxFileSize = 1024 * 1024; //! @note 1Mio
+   /**
+    * @brief The current message options.
+    */
    LogMessageDisplays mMessageOptions;
-   QVector<QString> mMessages;
-   QMutex mutex;
+   /**
+    * @brief Defines if the QLogWriter is currently stop and doesn't write to file
+    */
+   bool mIsStop = false;
 
    /**
     * @brief renameFileIfFull Truncates the log file in two. Keeps the filename for the new one and renames the old one
@@ -183,7 +200,7 @@ private:
     *
     * @param message Pair of values consistent on the date and the message to be log.
     */
-   void write(QVector<QString> messages);
+   void _write(QString message);
 };
 
 }

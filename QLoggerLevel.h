@@ -35,6 +35,7 @@ namespace QLogger
  */
 enum class LogLevel
 {
+   Default = -1,
    Trace = 0,
    Debug,
    Info,
@@ -48,6 +49,7 @@ enum class LogLevel
  */
 enum class LogMode
 {
+   Default = -1,
    Disabled = 0,
    OnlyConsole,
    OnlyFile,
@@ -55,10 +57,12 @@ enum class LogMode
 };
 
 /**
- * @brief The LogFileDisplay enum class defines which elements are written in the log file name.
+ * @brief The LogFileDisplay enum class defines which suffix is set to the log file name
+ * in case the file is full.
  */
 enum class LogFileDisplay
 {
+   Default = -1,
    DateTime,
    Number
 };
@@ -79,6 +83,7 @@ enum class LogMessageDisplay : unsigned int
 
    Default = LogLevel | ModuleName | DateTime | ThreadId | File | Line | Message,
    Default2 = LogLevel | ModuleName | DateTime | ThreadId | File | Function | Message,
+   Default3 = LogLevel | ModuleName | DateTime | ThreadId | Message,
    Full = 0xFF
 };
 
