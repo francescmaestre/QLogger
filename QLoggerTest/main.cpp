@@ -128,10 +128,6 @@ int main(int argc, char *argv[])
     QLog_Info(g_module5, QStringLiteral("\n---- Close Logger ----\n"));
     QLog_Info(g_module6, QStringLiteral("\n---- Close Logger ----\n"));
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    QThread::msleep(500);   // FIXME Find new solution replacing qGlobalPostedEventsCount() and remove this line
-#endif
-
     QLoggerManager::getInstance()->closeLogger();
 
     // --- End ---

@@ -222,6 +222,9 @@ public:
    void moveLogsWhenClose(const QString &newLogsFolder) { mNewLogsFolder = newLogsFolder; }
 
 private:
+   void incrementPostedMessageCount() { QMutexLocker lock(&mMutex); ++mPostedMessageCount; }
+   void decrementPostedMessageCount() { QMutexLocker lock(&mMutex); --mPostedMessageCount; }
+   int waitPostedMessageProcessed(int timeout = 1000);
    /**
     * @brief Checks if the logger is stop
     */
@@ -250,20 +253,23 @@ private:
    LogMessageDisplays mDefaultMessageOptions = LogMessageDisplay::Default;
    QString mNewLogsFolder;
 
-/**
- * @brief Mutex to make the method thread-safe.
- */
+  /**
+   * @brief Mutex to make the method thread-safe.
+   */
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
    QMutex mMutex { QMutex::Recursive };
 #else
    QRecursiveMutex mMutex;
 #endif
+   /**
+    * @brief Current number of posted events to enqueue messages. Used when closing logger.
+    */
+   int mPostedMessageCount = 0;
 
    /**
     * @brief Default builder of the class. It starts the thread.
     */
    QLoggerManager();
-
    /**
     * @brief Destructor
     */

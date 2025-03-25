@@ -307,6 +307,7 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
    const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE /** 2*/, // ignores first 00000
                                                    16, QLatin1Char('0'));
 
+   this->incrementCounter();
    emit _startEnqueueMessage(module, level, message, function, file, line, threadId);
 }
 
@@ -336,6 +337,7 @@ void QLoggerManager::_enqueueMessage(const QString &module, LogLevel level, cons
                              { QDateTime::currentDateTime(), threadId, QVariant::fromValue<LogLevel>(level), function,
                                fileName, line, message });
    }
+   this->decrementCounter();
 }
 
 void QLoggerManager::pause()
@@ -388,16 +390,45 @@ void QLoggerManager::overwriteMaxFileSize(int maxSize)
       logWriter->setMaxFileSize(maxSize);
 }
 
+int QLoggerManager::postedEventsCount(int timeout)
+{
+    int l_count = 0;
+
+    if (mMutex.tryLock(timeout)) {
+        l_count = mEnqueuedCounter;
+        mMutex.unlock();
+    } else {
+        l_count = -1;
+    }
+
+    while (l_count > 0) {
+        qDebug() << "# postedEventsCount =" << l_count;
+        // QThread::msleep(2);
+        qApp->processEvents();
+
+        if (mMutex.tryLock(timeout)) {
+            l_count = mEnqueuedCounter;
+            mMutex.unlock();
+        } else {
+            l_count = -1;
+        }
+    }
+    qDebug() << "# End: postedEventsCount =" << l_count;
+    return l_count;
+}
+
 void QLoggerManager::closeLogger()
 {
    // TODO Test with invokeMethod implementation
-   int l_count = postedEventsCountForPublic(getInstance());
+   // int l_count = postedEventsCountForPublic(getInstance());
 
-   while (l_count > 0) {
-       qDebug() << "# postedEventsCount =" << l_count;
-       l_count = postedEventsCountForPublic(getInstance());
-   }
-   qDebug() << "# End: postedEventsCount =" << l_count;
+   // while (l_count > 0) {
+   //     qDebug() << "# postedEventsCount =" << l_count;
+   //     l_count = postedEventsCountForPublic(getInstance());
+   // }
+   // qDebug() << "# End: postedEventsCount =" << l_count;
+
+   this->postedEventsCount();
 
    QVector<QString> oldFiles;
    { 
