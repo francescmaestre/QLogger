@@ -80,15 +80,15 @@ IndentCaseLabels: true
 
 IndentPPDirectives: AfterHash
 
-AlignAfterOpenBracket: Align
-
 AccessModifierOffset: -3
 
 IndentWidth: 3
 
 #StatementMacros ['Q_OBJECT', 'Q_UNUSED']
 
+---
+Language: Cpp
+PointerAlignment: Left
+# Use 120 columns for Cpp.
 ColumnLimit: 120
-
-
 

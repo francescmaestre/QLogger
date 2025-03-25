@@ -35,7 +35,7 @@ namespace QLogger
  */
 class QLoggerWriter : public QObject
 {
-    Q_OBJECT
+   Q_OBJECT
 
 public:
    /**
@@ -47,8 +47,8 @@ public:
     * @param mode The logging mode.
     * @param fileSuffixIfFull The filename suffix if the file is full.
     */
-   explicit QLoggerWriter(const QString &fileDestination, LogLevel level = LogLevel::Warning,
-                          const QString &fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
+   explicit QLoggerWriter(const QString& fileDestination, LogLevel level = LogLevel::Warning,
+                          const QString& fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
                           LogFileDisplay fileSuffixIfFull = LogFileDisplay::DateTime,
                           LogMessageDisplays messageOptions = LogMessageDisplay::Default);
 
@@ -87,7 +87,7 @@ public:
     * @param level The log level in LogLevel format.
     * @return The string with the name of the log level.
     */
-    static QString levelToText(const QLogger::LogLevel &level); 
+   static QString levelToText(const QLogger::LogLevel& level);
 
    /**
     * @brief Gets the current max size for the log file.
@@ -127,8 +127,8 @@ public:
     * @param line The line of the file name that prints the log.
     * @param message The message to log.
     */
-   void write(const QDateTime &date, const QString &threadId, const QString &module, LogLevel level,
-              const QString &function, const QString &fileName, int line, const QString &message);
+   void write(const QDateTime& date, const QString& threadId, const QString& module, LogLevel level,
+              const QString& function, const QString& fileName, int line, const QString& message);
 
    /**
     * @brief Stops the log writer
@@ -191,7 +191,7 @@ private:
     * @param fileSuffixNumber The file suffix number.
     * @return The complete path of the duplicated file name.
     */
-   static QString generateDuplicateFilename(const QString &fileDestination, const QString &fileExtension,
+   static QString generateDuplicateFilename(const QString& fileDestination, const QString& fileExtension,
                                             int fileSuffixNumber = 1);
 
    /**
