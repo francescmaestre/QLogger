@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
     auto *l_manager = QLoggerManager::getInstance();
     // Setup mode and level for testing
-    l_manager->setDefaultMode(LogMode::Full);
+    l_manager->setDefaultMode(LogMode::OnlyFile/*Full*/);
     // l_manager->setDefaultLevel(LogLevel::Debug);
 
     logDefault();
@@ -119,7 +119,6 @@ int main(int argc, char *argv[])
     logCustom();
 
     logCustom2();
-
 
     QLog_Info(g_module1, QStringLiteral("\n---- Close Logger ----\n"));
     QLog_Info(g_module2, QStringLiteral("\n---- Close Logger ----\n"));
@@ -129,9 +128,10 @@ int main(int argc, char *argv[])
     QLog_Info(g_module6, QStringLiteral("\n---- Close Logger ----\n"));
 
     QLoggerManager::getInstance()->closeLogger();
+    qInfo() << "# Logger closed.";
 
     // --- End ---
-    QTimer::singleShot(2500, &a, []() {
+    QTimer::singleShot(0, &a, []() {
         qInfo() << "# Done.";
         QLoggerManager::getInstance()->deleteLogger();
         exit(0);

@@ -222,9 +222,11 @@ public:
    void moveLogsWhenClose(const QString &newLogsFolder) { mNewLogsFolder = newLogsFolder; }
 
 private:
-   void incrementPostedMessageCount() { QMutexLocker lock(&mMutex); ++mPostedMessageCount; }
-   void decrementPostedMessageCount() { QMutexLocker lock(&mMutex); --mPostedMessageCount; }
-   int waitPostedMessageProcessed(int timeout = 1000);
+   /**
+    * @brief Invoked on QLogger's thread when closing logger after posted messages have been processed.
+    * @return oldFiles The list of log file paths
+    */
+   Q_INVOKABLE QVector<QString> waitPostedMessageProcessedFinished();
    /**
     * @brief Checks if the logger is stop
     */
@@ -261,10 +263,6 @@ private:
 #else
    QRecursiveMutex mMutex;
 #endif
-   /**
-    * @brief Current number of posted events to enqueue messages. Used when closing logger.
-    */
-   int mPostedMessageCount = 0;
 
    /**
     * @brief Default builder of the class. It starts the thread.

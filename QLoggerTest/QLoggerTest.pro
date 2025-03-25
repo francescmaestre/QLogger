@@ -1,9 +1,5 @@
 QT -= gui
 
-# lessThan(QT_MAJOR_VERSION, 6) {
-#     QT += core-private  # For qGlobalPostedEventsCount()
-# }
-
 CONFIG += c++11 console
 CONFIG -= app_bundle
 

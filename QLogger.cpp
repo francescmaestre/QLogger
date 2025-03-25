@@ -7,7 +7,6 @@
 #include <QThread>
 #include <QEvent>
 #include <QDebug>
-#include <QCoreApplication>
 
 Q_DECLARE_METATYPE(QLogger::LogLevel)
 Q_DECLARE_METATYPE(QLogger::LogMode)
@@ -15,47 +14,8 @@ Q_DECLARE_METATYPE(QLogger::LogFileDisplay)
 Q_DECLARE_METATYPE(QLogger::LogMessageDisplay)
 
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-uint qGlobalPostedEventsCount(); // Exported in Qt but not declared
-#else
-// FIXME qGlobalPostedEventsCount is no more exported
-#endif
-
 namespace QLogger
 {
-
-//! @link https://stackoverflow.com/questions/44440584/how-to-monitor-qt-signal-event-queue-depth
-int postedEventsCountForPublic(QObject * target, int timeout = 1000) {
-    uint count = 0;
-    QMutex mutex;
-    struct Event : QEvent {
-        QMutex& mutex;
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        QMutexLocker lock;
-    #else
-        QMutexLocker<QMutex> lock;
-    #endif
-        uint & count;
-        Event(QMutex & mutex, uint & count) :
-           QEvent(QEvent::None), mutex(mutex), lock(&mutex), count(count) {}
-        ~Event() {
-        #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-           count = qGlobalPostedEventsCount();
-        #else
-           // FIXME Qt6 doesn't export qGlobalPostedEventsCount
-        #endif
-        }
-    };
-    QCoreApplication::postEvent(target, new Event(mutex, count), INT_MAX);
-    if (mutex.tryLock(timeout)) {
-        mutex.unlock();
-        return int(count);
-    }
-    return -1;
-}
-
-
-
 
 void QLog_(const QString &module, LogLevel level, const QString &message,
            const QString &function, const QString &file, int line)
@@ -307,37 +267,37 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
    const auto threadId = QStringLiteral("%1").arg((quintptr)QThread::currentThread(), QT_POINTER_SIZE /** 2*/, // ignores first 00000
                                                    16, QLatin1Char('0'));
 
-   this->incrementCounter();
    emit _startEnqueueMessage(module, level, message, function, file, line, threadId);
 }
 
 void QLoggerManager::_enqueueMessage(const QString &module, LogLevel level, const QString &message, const QString& function,
                                      const QString &file, int line, const QString& threadId)
 {
-   QMutexLocker lock(&mMutex);
-   const auto logWriter = mModuleDest.value(module, nullptr);
-   const auto isLogEnabled = logWriter && logWriter->getMode() != LogMode::Disabled && !logWriter->isStop();
-
-   if (logWriter && isLogEnabled && logWriter->getLevel() <= level)
    {
-      const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
+       QMutexLocker lock(&mMutex);
+       const auto logWriter = mModuleDest.value(module, nullptr);
+       const auto isLogEnabled = logWriter && logWriter->getMode() != LogMode::Disabled && !logWriter->isStop();
 
-      writeAndDequeueMessages(module);
+       if (logWriter && isLogEnabled && logWriter->getLevel() <= level)
+       {
+           const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
 
-      logWriter->write(QDateTime::currentDateTime(), threadId, module, level, function, fileName, line, message);
+           writeAndDequeueMessages(module);
+
+           logWriter->write(QDateTime::currentDateTime(), threadId, module, level, function, fileName, line, message);
+       }
+       else if (!logWriter && mNonWriterQueue.count(module) < QUEUE_LIMIT)
+       {
+           const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
+
+           if (mDefaultMode != LogMode::OnlyFile) {
+               qWarning().noquote().nospace() << "No module for message [" << module << "][" << message << "]";
+           }
+           mNonWriterQueue.insert(module,
+                                  { QDateTime::currentDateTime(), threadId, QVariant::fromValue<LogLevel>(level), function,
+                                   fileName, line, message });
+       }
    }
-   else if (!logWriter && mNonWriterQueue.count(module) < QUEUE_LIMIT)
-   {
-      const auto fileName = file.mid(file.lastIndexOf(QLatin1Char('/')) + 1);
-
-      if (mDefaultMode != LogMode::OnlyFile) {
-        qWarning().noquote().nospace() << "No module for message [" << module << "][" << message << "]";
-      }
-      mNonWriterQueue.insert(module,
-                             { QDateTime::currentDateTime(), threadId, QVariant::fromValue<LogLevel>(level), function,
-                               fileName, line, message });
-   }
-   this->decrementCounter();
 }
 
 void QLoggerManager::pause()
@@ -390,67 +350,42 @@ void QLoggerManager::overwriteMaxFileSize(int maxSize)
       logWriter->setMaxFileSize(maxSize);
 }
 
-int QLoggerManager::postedEventsCount(int timeout)
+QVector<QString> QLoggerManager::waitPostedMessageProcessedFinished()
 {
-    int l_count = 0;
+   // qDebug() << "#" << QThread::currentThread();
+   QVector<QString> oldFiles;
+   {
+       QMutexLocker locker(&mMutex);
 
-    if (mMutex.tryLock(timeout)) {
-        l_count = mEnqueuedCounter;
-        mMutex.unlock();
-    } else {
-        l_count = -1;
-    }
+       for (auto i = mModuleDest.cbegin(), end = mModuleDest.cend(); i != end; ++i)
+           writeAndDequeueMessages(i.key());
 
-    while (l_count > 0) {
-        qDebug() << "# postedEventsCount =" << l_count;
-        // QThread::msleep(2);
-        qApp->processEvents();
+   #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+       for (auto dest : qAsConst(mModuleDest))
+   #else
+       for (auto dest : std::as_const(mModuleDest))
+   #endif
+       {
+           dest->stop(true);
 
-        if (mMutex.tryLock(timeout)) {
-            l_count = mEnqueuedCounter;
-            mMutex.unlock();
-        } else {
-            l_count = -1;
-        }
-    }
-    qDebug() << "# End: postedEventsCount =" << l_count;
-    return l_count;
+           oldFiles.append(dest->getFileDestinationFolder());
+       }
+
+       qDeleteAll(mModuleDest);
+       mModuleDest.clear();
+   }
+
+   return oldFiles;
 }
 
 void QLoggerManager::closeLogger()
 {
-   // TODO Test with invokeMethod implementation
-   // int l_count = postedEventsCountForPublic(getInstance());
-
-   // while (l_count > 0) {
-   //     qDebug() << "# postedEventsCount =" << l_count;
-   //     l_count = postedEventsCountForPublic(getInstance());
-   // }
-   // qDebug() << "# End: postedEventsCount =" << l_count;
-
-   this->postedEventsCount();
-
    QVector<QString> oldFiles;
-   { 
-      QMutexLocker locker(&mMutex);
 
-      for (auto i = mModuleDest.cbegin(), end = mModuleDest.cend(); i != end; ++i)
-          writeAndDequeueMessages(i.key());
-
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-      for (auto dest : qAsConst(mModuleDest))
-    #else
-      for (auto dest : std::as_const(mModuleDest))
-    #endif
-      {
-         dest->stop(true);
-
-         oldFiles.append(dest->getFileDestinationFolder());
-      }
-
-      qDeleteAll(mModuleDest);
-      mModuleDest.clear();
-   }
+   // Invoke in QLogger's thread
+   QMetaObject::invokeMethod(this, "waitPostedMessageProcessedFinished",
+                             Qt::BlockingQueuedConnection,  // When the method gets called, previous pending message events have been processed
+                             Q_RETURN_ARG(QVector<QString>, oldFiles));
 
    this->pause();
 
@@ -483,8 +418,8 @@ void QLoggerManager::closeLogger()
       }
    }
    
-    getInstanceThread()->quit();
-    getInstanceThread()->wait();
+   getInstanceThread()->quit();
+   getInstanceThread()->wait();
 }
 
 void QLoggerManager::deleteLogger()
