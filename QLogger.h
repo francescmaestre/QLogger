@@ -75,7 +75,7 @@ public:
    bool addDestination(const QString& fileDest, const QString& module, LogLevel level = LogLevel::Default,
                        const QString& fileFolderDestination = QString(), LogMode mode = LogMode::Default,
                        LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
-                       LogMessageDisplays messageOptions = LogMessageDisplays(), bool notify = true);
+                       LogMessageDisplays messageOptions = LogMessageDisplays());
    /**
     * @brief This method creates a QLoogerWriter that stores the name of the file and the log
     * level assigned to it. Here is added to the map the different modules assigned to each
@@ -94,7 +94,7 @@ public:
    bool addDestination(const QString& fileDest, const QStringList& modules, LogLevel level = LogLevel::Default,
                        const QString& fileFolderDestination = QString(), LogMode mode = LogMode::Default,
                        LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
-                       LogMessageDisplays messageOptions = LogMessageDisplays(), bool notify = true);
+                       LogMessageDisplays messageOptions = LogMessageDisplays());
    /**
     * @brief Clears old log files from the current storage folder.
     *
@@ -234,6 +234,12 @@ public:
     */
    void moveLogsWhenClose(const QString& newLogsFolder) { mNewLogsFolder = newLogsFolder; }
 
+   /**
+    * @brief Enable writing a log message when a new destination is added or not.
+    * @param logNewDestination Enable or not
+    */
+   void enableLogNewDestination(bool logNewDestination) { mLogNewDestination = logNewDestination; }
+
 private:
    /**
     * @brief Invoked on QLogger's thread when closing logger after posted messages have been processed.
@@ -266,6 +272,13 @@ private:
    LogLevel mDefaultLevel = LogLevel::Warning;
    int mDefaultMaxFileSize = 1024 * 1024; //! @note 1Mio
    LogMessageDisplays mDefaultMessageOptions = LogMessageDisplay::Default;
+   /**
+    * @brief Write a log message when a new destination is added.
+    */
+   bool mLogNewDestination = true;
+   /**
+    * @brief If set, this is the folder that will store the logs on close.
+    */
    QString mNewLogsFolder;
 
    /**
@@ -299,7 +312,7 @@ private:
    QLoggerWriter* createWriter(const QString& fileDest, LogLevel level, const QString& fileFolderDestination,
                                LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const;
 
-   void startWriter(const QString& module, QLoggerWriter* log, LogMode mode, bool notify);
+   void startWriter(const QString& module, QLoggerWriter* log, LogMode mode);
 
    /**
     * @brief Checks the queue and writes the messages if the writer is the correct one. The queue is emptied

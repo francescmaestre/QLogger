@@ -71,7 +71,7 @@ bool QLoggerManager::instanceIsAlive()
 
 bool QLoggerManager::addDestination(const QString& fileDest, const QString& module, LogLevel level,
                                     const QString& fileFolderDestination, LogMode mode, LogFileDisplay fileSuffixIfFull,
-                                    LogMessageDisplays messageOptions, bool notify)
+                                    LogMessageDisplays messageOptions)
 {
    QMutexLocker lock(&mMutex);
 
@@ -82,7 +82,7 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QString& modu
 
       mModuleDest.insert(module, log);
 
-      startWriter(module, log, mode, notify);
+      startWriter(module, log, mode);
 
       return true;
    }
@@ -92,7 +92,7 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QString& modu
 
 bool QLoggerManager::addDestination(const QString& fileDest, const QStringList& modules, LogLevel level,
                                     const QString& fileFolderDestination, LogMode mode, LogFileDisplay fileSuffixIfFull,
-                                    LogMessageDisplays messageOptions, bool notify)
+                                    LogMessageDisplays messageOptions)
 {
    QMutexLocker lock(&mMutex);
    bool allAdded = false;
@@ -106,7 +106,7 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QStringList& 
 
          mModuleDest.insert(module, log);
 
-         startWriter(module, log, mode, notify);
+         startWriter(module, log, mode);
 
          allAdded = true;
       }
@@ -138,11 +138,11 @@ QLoggerWriter* QLoggerManager::createWriter(const QString& fileDest, LogLevel le
    return log;
 }
 
-void QLoggerManager::startWriter(const QString& module, QLoggerWriter* log, LogMode mode, bool notify)
+void QLoggerManager::startWriter(const QString& module, QLoggerWriter* log, LogMode mode)
 {
    Q_UNUSED(log)
    Q_UNUSED(mode)
-   if (notify)
+   if (mLogNewDestination)
    {
       this->enqueueMessage(module, LogLevel::Info, QStringLiteral("Adding destination!"), QString(), QString(), -1);
    }
