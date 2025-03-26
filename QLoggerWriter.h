@@ -23,6 +23,7 @@
  ***************************************************************************************/
 
 #include <QLoggerLevel.h>
+#include <QLogger_global.h>
 
 #include <QVector>
 #include <QObject>
@@ -87,7 +88,7 @@ public:
     * @param level The log level in LogLevel format.
     * @return The string with the name of the log level.
     */
-   static QString levelToText(const QLogger::LogLevel& level);
+   QLOGGERSHARED_EXPORT static QString levelToText(const QLogger::LogLevel& level);
 
    /**
     * @brief Gets the current max size for the log file.

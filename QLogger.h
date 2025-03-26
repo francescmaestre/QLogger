@@ -23,6 +23,7 @@
  ***************************************************************************************/
 
 #include <QLoggerLevel.h>
+#include <QLogger_global.h>
 
 #include <QMutex>
 #include <QMap>
@@ -36,7 +37,7 @@ class QLoggerWriter;
 /**
  * @brief The QLoggerManager class manages the different destination files that we would like to have.
  */
-class QLoggerManager : public QObject
+class QLOGGERSHARED_EXPORT QLoggerManager : public QObject
 {
    Q_OBJECT
 

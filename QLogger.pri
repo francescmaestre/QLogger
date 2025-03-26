@@ -7,4 +7,5 @@ SOURCES += \
 HEADERS += \
     $$PWD/QLogger.h \
     $$PWD/QLoggerLevel.h \
-    $$PWD/QLoggerWriter.h
+    $$PWD/QLoggerWriter.h \
+    $$PWD/QLogger_global.h
