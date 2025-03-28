@@ -20,6 +20,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 ## Static Imports
+DEFINES += QLOGGER_STATIC   # Mandatory for a static import
+
 !build_pass:message("QLoggerTest: importing QLogger")
 if (!include($$PWD/../QLogger.pri)) {
     error( Could not find the QLogger.pri file. )
