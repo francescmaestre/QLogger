@@ -223,7 +223,10 @@ public:
    void setDefaultMode(LogMode mode) { mDefaultMode = mode; }
    void setDefaultMaxFileSize(int maxFileSize) { mDefaultMaxFileSize = maxFileSize; }
    void setDefaultMessageOptions(LogMessageDisplays messageOptions) { mDefaultMessageOptions = messageOptions; }
-   void setDefaultMessageOptionsOrder(LogMessageDisplayOrder messageOrder) { mDefaultMessageOptionsOrder = messageOrder; }
+   void setDefaultMessageOptionsOrder(LogMessageDisplayOrder messageOrder)
+   {
+      mDefaultMessageOptionsOrder = messageOrder;
+   }
 
    /**
     * @brief overwriteLogMode Overwrites the logging mode in all the destinations. Sets the default logging mode.
@@ -482,6 +485,10 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
 #   define QLog_AddDestObj(level)                                                                                      \
       QLogger::QLoggerManager::getInstance()->addDestination(QString(),                                                \
                                                              QString::fromLatin1(metaObject()->className()), level)
+
+#   define QLog_AddDest_qObj(baseClass, level)                                                                         \
+      QLogger::QLoggerManager::getInstance()->addDestination(                                                          \
+          QString(), QString::fromLatin1(baseClass::staticMetaObject.className()), level)
 /**
  * @brief Used to add a new destination with the default destination folder in a QML plugin.
  * @param level The log level of the module.
@@ -492,6 +499,13 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
          QLogger::QLoggerManager::getInstance()->addDestination(                                                       \
              QString(), QString::fromLatin1(metaObject()->className()), level);                                        \
       }
+
+#   define QLog_AddDest_qObjPlugin(baseClass, level)                                                                   \
+      if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
+      {                                                                                                                \
+         QLogger::QLoggerManager::getInstance()->addDestination(                                                       \
+             QString(), QString::fromLatin1(baseClass::staticMetaObject.className()), level);                          \
+      }
 #endif
 
 #ifndef QLog_AddDestDflt
@@ -500,6 +514,11 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
  */
 #   define QLog_AddDestDflt()                                                                                          \
       QLogger::QLoggerManager::getInstance()->addDestination(QString(), QString::fromLatin1(metaObject()->className()))
+
+#   define QLog_AddDest_qDflt(baseClass)                                                                               \
+      QLogger::QLoggerManager::getInstance()->addDestination(                                                          \
+          QString(), QString::fromLatin1(baseClass::staticMetaObject.className()))
+
 /**
  * @brief Used to add a new destination with the default destination folder and level in a QML plugin.
  */
@@ -508,6 +527,13 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
       {                                                                                                                \
          QLogger::QLoggerManager::getInstance()->addDestination(QString(),                                             \
                                                                 QString::fromLatin1(metaObject()->className()));       \
+      }
+
+#   define QLog_AddDest_qDfltPlugin(baseClass)                                                                         \
+      if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
+      {                                                                                                                \
+         QLogger::QLoggerManager::getInstance()->addDestination(                                                       \
+             QString(), QString::fromLatin1(baseClass::staticMetaObject.className()));                                 \
       }
 #endif
 
@@ -649,10 +675,10 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
          }
 #   endif
 #   ifndef L_DEBUG_qLogFinal
-#      define L_DEBUG_qLogFinal(message)                                                                               \
+#      define L_DEBUG_qLogFinal(baseClass, message)                                                                    \
          if (this->children().isEmpty())                                                                               \
          {                                                                                                             \
-            L_DEBUG_qLog(message);                                                                                     \
+            L_DEBUG_qLog(baseClass, message);                                                                          \
          }
 #   endif
 
