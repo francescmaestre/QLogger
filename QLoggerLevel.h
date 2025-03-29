@@ -68,7 +68,7 @@ enum class LogFileDisplay
 };
 
 /**
- * @brief The LogTextDisplay enum class defines which elements are written by log message.
+ * @brief The LogTextDisplay enum class defines which elements are written per log message.
  */
 enum class LogMessageDisplay : unsigned int
 {
@@ -89,5 +89,16 @@ enum class LogMessageDisplay : unsigned int
 
 Q_DECLARE_FLAGS(LogMessageDisplays, LogMessageDisplay)
 Q_DECLARE_OPERATORS_FOR_FLAGS(LogMessageDisplays)
+
+/**
+ * @brief The LogMessageDisplayOrder enum class defines the element order written per log message.
+ * in case the file is full.
+ */
+enum class LogMessageDisplayOrder
+{
+   Default = -1,
+   LevelFirst, ///< The order is: [Level][Module][Date][ThreadId]{FileLine}{Function} message (Date as nb of secs)
+   DateTimeFirst ///< The order is: Date [Level][ThreadId][Module]{FileLine}{Function} message (Date as string)
+};
 
 }
