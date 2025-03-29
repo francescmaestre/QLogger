@@ -9,6 +9,9 @@
 namespace QLogger
 {
 
+const QString QLoggerWriter::kNullString = QString();
+const QString QLoggerWriter::kDateTimeFormat = QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz");
+
 QLoggerWriter::QLoggerWriter(const QString& fileDestination, LogLevel level, const QString& fileFolderDestination,
                              LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions)
    : mFileSuffixIfFull(fileSuffixIfFull)
@@ -59,27 +62,34 @@ void QLoggerWriter::setLogMode(LogMode mode)
  * @param level The log level in LogLevel format.
  * @return The string with the name of the log level.
  */
-QString QLoggerWriter::levelToText(const QLogger::LogLevel& level)
+const QString& QLoggerWriter::levelToText(const QLogger::LogLevel& level)
 {
    switch (level)
    {
       case QLogger::LogLevel::Trace:
-         return QStringLiteral("Trace");
+         static const auto kTrace(QStringLiteral("Trace"));
+         return kTrace;
       case QLogger::LogLevel::Debug:
-         return QStringLiteral("Debug");
+         static const auto kDebug(QStringLiteral("Debug"));
+         return kDebug;
       case QLogger::LogLevel::Info:
-         return QStringLiteral("Info");
+         static const auto kInfo(QStringLiteral("Info"));
+         return kInfo;
       case QLogger::LogLevel::Warning:
-         return QStringLiteral("Warning");
+         static const auto kWarn(QStringLiteral("Warning"));
+         return kWarn;
       case QLogger::LogLevel::Error:
-         return QStringLiteral("Error");
+         static const auto kError(QStringLiteral("Error"));
+         return kError;
       case QLogger::LogLevel::Fatal:
-         return QStringLiteral("Fatal");
+         static const auto kFatal(QStringLiteral("Fatal"));
+         return kFatal;
       case QLogger::LogLevel::Default:
-         return QStringLiteral("Default");
+         static const auto kDefault(QStringLiteral("Default"));
+         return kDefault;
    }
 
-   return QString();
+   return kNullString;
 }
 
 QString QLoggerWriter::renameFileIfFull()
@@ -197,15 +207,14 @@ void QLoggerWriter::write(const QDateTime& date, const QString& threadId, const 
    {
       // TODO Add option for defining log message info order
       text = QStringLiteral("%1 [%2][%3][%4]%5 %6")
-                 .arg(date.toString(QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz")), levelToText(level), threadId, module,
-                      fileLine, message);
+                 .arg(date.toString(kDateTimeFormat), levelToText(level), threadId, module, fileLine, message);
    }
    // TODO Implement cases Default2, Default3
    else
    {
       if (mMessageOptions.testFlag(LogMessageDisplay::DateTime))
       {
-         text.append(QString::fromLatin1("%1 ").arg(date.toString(QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz"))));
+         text.append(QString::fromLatin1("%1 ").arg(date.toString(kDateTimeFormat)));
       }
       if (mMessageOptions.testFlag(LogMessageDisplay::LogLevel))
       {

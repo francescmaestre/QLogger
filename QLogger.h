@@ -110,6 +110,18 @@ public:
     */
    static void initializeLoggerConsole(LogLevel level = LogLevel::Info, bool debugModeOnly = false);
    /**
+    * @brief Gets the QLoggerWriter's mode corresponding to the module <em>module</em>.
+    * @param module The module we look for.
+    * @return Returns the log mode of the module, Default (-1) is returned if not found.
+    */
+   LogMode getModuleMode(const QString& module);
+   /**
+    * @brief Sets the QLoggerWriter's mode corresponding to the module <em>module</em>.
+    * @param module The module we look for.
+    * @param mode The mode to apply to the module.
+    */
+   void setModuleLogMode(const QString& module, LogMode mode);
+   /**
     * @brief Gets the QLoggerWriter's level corresponding to the module <em>module</em>.
     * @param module The module we look for.
     * @return Returns the log level of the module, Default (-1) is returned if not found.
@@ -359,6 +371,8 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
 
 }
 
+// Macros for writing log messages
+
 #ifndef QLog_Trace
 /**
  * @brief Used to store Trace level messages.
@@ -431,6 +445,8 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
                                                              QString::fromLatin1(__FILE__), __LINE__)
 #endif
 
+// Macros for adding destinations
+
 #ifndef QLog_AddDest
 /**
  * @brief Used to add a new destination with the default destination folder.
@@ -487,9 +503,12 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
       }
 #endif
 
-#ifndef L_Obj
+// Macros for writing log messages with QObject's class name as module name
+
+#ifndef L_LOGGING_MACROS_QOBJECT
+#   define L_LOGGING_MACROS_QOBJECT
 /**
- * @brief Used to store messages to the module referenced by the class name or the base class name.
+ * @brief Used to store messages to the module referenced by the QObject class name or the base class name.
  * @param module The module that the message references.
  * @param message The message.
  */
@@ -549,39 +568,42 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
          QLog_Fatal(QString::fromLatin1(metaObject()->className()), message);                                          \
       }
 
-#   define L_TRACE_qObjP(baseClass, messagege)                                                                         \
+#   define L_TRACE_qObjP(baseClass, message)                                                                           \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Trace(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                            \
       }
-#   define L_DEBUG_qObjP(baseClass, messagege)                                                                         \
+#   define L_DEBUG_qObjP(baseClass, message)                                                                           \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Debug(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                            \
       }
-#   define L_INFO_qObjP(baseClass, messagege)                                                                          \
+#   define L_INFO_qObjP(baseClass, message)                                                                            \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Info(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                             \
       }
-#   define L_WARN_qObjP(baseClass, messagege)                                                                          \
+#   define L_WARN_qObjP(baseClass, message)                                                                            \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Warning(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                          \
       }
-#   define L_ERROR_qObjP(baseClass, messagege)                                                                         \
+#   define L_ERROR_qObjP(baseClass, message)                                                                           \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Error(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                            \
       }
-#   define L_FATAL_qObjP(baseClass, messagege)                                                                         \
+#   define L_FATAL_qObjP(baseClass, message)                                                                           \
       if (QLogger::QLoggerManager::instanceIsAlive())                                                                  \
       {                                                                                                                \
          QLog_Fatal(QString::fromLatin1(baseClass::staticMetaObject.className()), message);                            \
       }
 
+// Macros for writing log messages with QObject's class name as module name according to the debug/release mode
+
 /**
- * @brief Used to log debug message according to the debug or release mode of the application.
+ * @brief Used to log debug message according to the debug or release mode of the application (e.g.: to log an object
+ * destruction only in debug mode).
  */
 #   ifndef L_DEBUG_Log
 #      ifdef QT_DEBUG
@@ -611,4 +633,19 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
 #      endif
 #   endif
 
-#endif
+#   ifndef L_DEBUG_LogFinal
+#      define L_DEBUG_LogFinal(message)                                                                                \
+         if (this->children().isEmpty())                                                                               \
+         {                                                                                                             \
+            L_DEBUG_Log(message);                                                                                      \
+         }
+#   endif
+#   ifndef L_DEBUG_qLogFinal
+#      define L_DEBUG_qLogFinal(message)                                                                               \
+         if (this->children().isEmpty())                                                                               \
+         {                                                                                                             \
+            L_DEBUG_qLog(message);                                                                                     \
+         }
+#   endif
+
+#endif // L_LOGGING_MACROS_QOBJECT

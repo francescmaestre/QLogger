@@ -88,7 +88,7 @@ public:
     * @param level The log level in LogLevel format.
     * @return The string with the name of the log level.
     */
-   QLOGGERSHARED_EXPORT static QString levelToText(const QLogger::LogLevel& level);
+   QLOGGERSHARED_EXPORT static const QString& levelToText(const QLogger::LogLevel& level);
 
    /**
     * @brief Gets the current max size for the log file.
@@ -202,6 +202,12 @@ private:
     * @param message Pair of values consistent on the date and the message to be log.
     */
    void _write(QString message);
+
+   static const QString kNullString;
+   /**
+    * @brief Format for the date in the log string.
+    */
+   static const QString kDateTimeFormat;
 };
 
 }

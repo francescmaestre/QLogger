@@ -198,6 +198,27 @@ void QLoggerManager::initializeLoggerConsole(LogLevel level, bool debugModeOnly)
    l_manager->setDefaultLevel(level);
 }
 
+LogMode QLogger::QLoggerManager::getModuleMode(const QString& module)
+{
+   QMutexLocker lock(&mMutex);
+   auto* l_logWriter = mModuleDest.value(module, nullptr);
+   if (l_logWriter)
+   {
+      return l_logWriter->getMode();
+   }
+   return LogMode::Default;
+}
+
+void QLoggerManager::setModuleLogMode(const QString& module, LogMode mode)
+{
+   QMutexLocker lock(&mMutex);
+   auto* l_logWriter = mModuleDest.value(module, nullptr);
+   if (l_logWriter)
+   {
+      l_logWriter->setLogMode(mode);
+   }
+}
+
 LogLevel QLoggerManager::getModuleLevel(const QString& module)
 {
    QMutexLocker lock(&mMutex);
