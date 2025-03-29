@@ -42,9 +42,9 @@ void logDefault()
    // Create destination with a given file name
    l_manager->addDestination(g_file1, g_module1, LogLevel::Debug);
    QLog_Debug(g_module1, QStringLiteral("This is a debug log message 0."));
-   QLog_Debug(g_module1, QStringLiteral("This is a debug log message 1.."));
-   QLog_Debug(g_module1, QStringLiteral("This is a debug log message 2..."));
-   QLog_Debug(g_module1, QStringLiteral("This is a debug log message 3...."));
+   QLog_Info(g_module1, QStringLiteral("This is a info log message 1."));
+   QLog_Warning(g_module1, QStringLiteral("This is a warning log message 2."));
+   QLog_Error(g_module1, QStringLiteral("This is an error log message 3."));
 
    // Try to create another module of the same name but with a different file name and level - ignoring
    l_manager->addDestination(g_file2, g_module1, LogLevel::Debug);
@@ -53,7 +53,7 @@ void logDefault()
 
    // The module doesn't exist yet - messages are enqueued
    QLog_Debug(g_module2, QStringLiteral("This is a TestiiTest from uncreated module."));
-   QThread::msleep(500); // To test uncreated module case
+   QThread::msleep(150); // To test uncreated module case
    // Create the corresponding module
    l_manager->addDestination(g_file2, g_module2, LogLevel::Debug);
    QLog_Debug(g_module2, QStringLiteral("This is a TestiiTest on created module."));
@@ -74,6 +74,7 @@ void logCustom()
 
    // The module doesn't exist yet - messages are enqueued
    QLog_Debug(g_module4, QStringLiteral("This is a TestiiTest."));
+   QThread::msleep(150); // To test uncreated module case
    // Create the corresponding module with auto-generated filename, default destination folder with a custom log message
    // display
    l_manager->addDestination(QString(), g_module4, LogLevel::Debug, QString(), LogMode::Full, LogFileDisplay::Number,
@@ -99,7 +100,7 @@ void logCustom2()
    QLog_Debug(g_module6, QStringLiteral("This is a debug log message 0-1."));
 
    // Changing message options on existing module
-   QThread::msleep(100);
+   QThread::msleep(150);
    l_manager->setModuleLogLevel(g_module6, LogLevel::Trace);
    l_manager->setModuleMessageOptions(g_module6, LogMessageDisplay::LogLevel | LogMessageDisplay::Message);
    QLog_Trace(g_module6, QStringLiteral("This is a trace log message"));
@@ -114,8 +115,9 @@ int main(int argc, char* argv[])
 
    auto* l_manager = QLoggerManager::getInstance();
    // Setup mode and level for testing
-   l_manager->setDefaultMode(LogMode::Full /*Full*/);
+   l_manager->setDefaultMode(LogMode::Full);
    // l_manager->setDefaultLevel(LogLevel::Debug);
+   l_manager->setDefaultMessageOptionsOrder(LogMessageDisplayOrder::DateTimeFirst);
 
    logDefault();
 

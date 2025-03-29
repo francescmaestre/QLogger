@@ -70,12 +70,14 @@ public:
     * @param mode The logging mode.
     * @param fileSuffixIfFull The filename suffix if the file is full.
     * @param messageOptions Specifies what elements are displayed in one line of log message.
+    * @param messageOrder Specifies the element order displayed in one line of log message.
     * @return Returns true if any error have been done.
     */
    bool addDestination(const QString& fileDest, const QString& module, LogLevel level = LogLevel::Default,
                        const QString& fileFolderDestination = QString(), LogMode mode = LogMode::Default,
                        LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
-                       LogMessageDisplays messageOptions = LogMessageDisplays());
+                       LogMessageDisplays messageOptions = LogMessageDisplays(),
+                       LogMessageDisplayOrder messageOrder = LogMessageDisplayOrder::Default);
    /**
     * @brief This method creates a QLoogerWriter that stores the name of the file and the log
     * level assigned to it. Here is added to the map the different modules assigned to each
@@ -89,12 +91,14 @@ public:
     * @param mode The logging mode.
     * @param fileSuffixIfFull The filename suffix if the file is full.
     * @param messageOptions Specifies what elements are displayed in one line of log message.
+    * @param messageOrder Specifies the element order displayed in one line of log message.
     * @return Returns true if any error have been done.
     */
    bool addDestination(const QString& fileDest, const QStringList& modules, LogLevel level = LogLevel::Default,
                        const QString& fileFolderDestination = QString(), LogMode mode = LogMode::Default,
                        LogFileDisplay fileSuffixIfFull = LogFileDisplay::Default,
-                       LogMessageDisplays messageOptions = LogMessageDisplays());
+                       LogMessageDisplays messageOptions = LogMessageDisplays(),
+                       LogMessageDisplayOrder messageOrder = LogMessageDisplayOrder::Default);
    /**
     * @brief Clears old log files from the current storage folder.
     *
@@ -219,6 +223,7 @@ public:
    void setDefaultMode(LogMode mode) { mDefaultMode = mode; }
    void setDefaultMaxFileSize(int maxFileSize) { mDefaultMaxFileSize = maxFileSize; }
    void setDefaultMessageOptions(LogMessageDisplays messageOptions) { mDefaultMessageOptions = messageOptions; }
+   void setDefaultMessageOptionsOrder(LogMessageDisplayOrder messageOrder) { mDefaultMessageOptionsOrder = messageOrder; }
 
    /**
     * @brief overwriteLogMode Overwrites the logging mode in all the destinations. Sets the default logging mode.
@@ -284,6 +289,7 @@ private:
    LogLevel mDefaultLevel = LogLevel::Warning;
    int mDefaultMaxFileSize = 1024 * 1024; //! @note 1Mio
    LogMessageDisplays mDefaultMessageOptions = LogMessageDisplay::Default;
+   LogMessageDisplayOrder mDefaultMessageOptionsOrder = LogMessageDisplayOrder::LevelFirst;
    /**
     * @brief Write a log message when a new destination is added.
     */
@@ -319,10 +325,12 @@ private:
     * @param mode The logging mode.
     * @param fileSuffixIfFull The filename suffix if the file is full.
     * @param messageOptions Specifies what elements are displayed in one line of log message.
+    * @param messageOrder Specifies the element order displayed in one line of log message.
     * @return the newly created QLoggerWriter instance.
     */
    QLoggerWriter* createWriter(const QString& fileDest, LogLevel level, const QString& fileFolderDestination,
-                               LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const;
+                               LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions,
+                               LogMessageDisplayOrder messageOrder) const;
 
    void startWriter(const QString& module, QLoggerWriter* log, LogMode mode);
 

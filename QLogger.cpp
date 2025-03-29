@@ -71,13 +71,14 @@ bool QLoggerManager::instanceIsAlive()
 
 bool QLoggerManager::addDestination(const QString& fileDest, const QString& module, LogLevel level,
                                     const QString& fileFolderDestination, LogMode mode, LogFileDisplay fileSuffixIfFull,
-                                    LogMessageDisplays messageOptions)
+                                    LogMessageDisplays messageOptions, LogMessageDisplayOrder messageOrder)
 {
    QMutexLocker lock(&mMutex);
 
    if (!mModuleDest.contains(module))
    {
-      const auto log = createWriter(fileDest, level, fileFolderDestination, mode, fileSuffixIfFull, messageOptions);
+      const auto log
+          = createWriter(fileDest, level, fileFolderDestination, mode, fileSuffixIfFull, messageOptions, messageOrder);
       log->moveToThread(getInstanceThread());
 
       mModuleDest.insert(module, log);
@@ -92,7 +93,7 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QString& modu
 
 bool QLoggerManager::addDestination(const QString& fileDest, const QStringList& modules, LogLevel level,
                                     const QString& fileFolderDestination, LogMode mode, LogFileDisplay fileSuffixIfFull,
-                                    LogMessageDisplays messageOptions)
+                                    LogMessageDisplays messageOptions, LogMessageDisplayOrder messageOrder)
 {
    QMutexLocker lock(&mMutex);
    bool allAdded = false;
@@ -101,7 +102,8 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QStringList& 
    {
       if (!mModuleDest.contains(module))
       {
-         const auto log = createWriter(fileDest, level, fileFolderDestination, mode, fileSuffixIfFull, messageOptions);
+         const auto log = createWriter(fileDest, level, fileFolderDestination, mode, fileSuffixIfFull, messageOptions,
+                                       messageOrder);
          log->moveToThread(getInstanceThread());
 
          mModuleDest.insert(module, log);
@@ -117,7 +119,8 @@ bool QLoggerManager::addDestination(const QString& fileDest, const QStringList& 
 
 QLoggerWriter* QLoggerManager::createWriter(const QString& fileDest, LogLevel level,
                                             const QString& fileFolderDestination, LogMode mode,
-                                            LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const
+                                            LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions,
+                                            LogMessageDisplayOrder messageOrder) const
 {
    const auto lFileDest = fileDest.isEmpty() ? mDefaultFileDestination : fileDest;
    const auto lLevel = level == LogLevel::Default ? mDefaultLevel : level;
@@ -128,9 +131,10 @@ QLoggerWriter* QLoggerManager::createWriter(const QString& fileDest, LogLevel le
    const auto lFileSuffixIfFull
        = fileSuffixIfFull == LogFileDisplay::Default ? mDefaultFileSuffixIfFull : fileSuffixIfFull;
    const auto lMessageOptions = messageOptions == LogMessageDisplays() ? mDefaultMessageOptions : messageOptions;
+   const auto lMessageOrder = messageOrder == LogMessageDisplayOrder::Default ? mDefaultMessageOptionsOrder : messageOrder;
 
-   const auto log
-       = new QLoggerWriter(lFileDest, lLevel, lFileFolderDestination, lMode, lFileSuffixIfFull, lMessageOptions);
+   const auto log = new QLoggerWriter(lFileDest, lLevel, lFileFolderDestination, lMode, lFileSuffixIfFull,
+                                      lMessageOptions, lMessageOrder);
 
    log->setMaxFileSize(mDefaultMaxFileSize);
    log->stop(mIsStop);

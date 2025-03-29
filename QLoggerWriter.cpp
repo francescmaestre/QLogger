@@ -13,11 +13,13 @@ const QString QLoggerWriter::kNullString = QString();
 const QString QLoggerWriter::kDateTimeFormat = QStringLiteral("yyyy-MM-dd hh:mm:ss.zzz");
 
 QLoggerWriter::QLoggerWriter(const QString& fileDestination, LogLevel level, const QString& fileFolderDestination,
-                             LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions)
+                             LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions,
+                             LogMessageDisplayOrder messageOrder)
    : mFileSuffixIfFull(fileSuffixIfFull)
    , mMode(mode)
    , mLevel(level)
    , mMessageOptions(messageOptions)
+   , mMessageOptionsOrder(messageOrder)
 {
    mFileDestinationFolder
        = fileFolderDestination.isEmpty() ? QDir::currentPath() + QStringLiteral("/logs/") : fileFolderDestination;
@@ -31,13 +33,13 @@ QLoggerWriter::QLoggerWriter(const QString& fileDestination, LogLevel level, con
    if (fileDestination.isEmpty())
    {
       // Generate a filename according to the date
-      mFileDestination = dir.filePath(QString::fromLatin1("%1.log").arg(
-          QDateTime::currentDateTime().date().toString(QString::fromLatin1("yyyy-MM-dd"))));
+      mFileDestination = dir.filePath(
+          QStringLiteral("%1.log").arg(QDateTime::currentDateTime().date().toString(QStringLiteral("yyyy-MM-dd"))));
    }
    else if (!fileDestination.contains(QLatin1Char('.')))
    {
       // Add default file extension
-      mFileDestination.append(QString::fromLatin1(".log"));
+      mFileDestination.append(QStringLiteral(".log"));
    }
 
    if (mMode == LogMode::Full || mMode == LogMode::OnlyFile)
@@ -191,6 +193,7 @@ void QLoggerWriter::write(const QDateTime& date, const QString& threadId, const 
    if (mMode == LogMode::Disabled)
       return;
 
+   // File and Line are only written when the module's level is Debug or lower
    QString fileLine;
    if (mMessageOptions.testFlag(LogMessageDisplay::File) && mMessageOptions.testFlag(LogMessageDisplay::Line)
        && !fileName.isEmpty() && line > 0 && mLevel <= LogLevel::Debug)
@@ -203,54 +206,81 @@ void QLoggerWriter::write(const QDateTime& date, const QString& threadId, const 
    }
 
    QString text;
-   if (mMessageOptions.testFlag(LogMessageDisplay::Default))
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+   if (mMessageOptions == LogMessageDisplays(LogMessageDisplay::Default)
+       || mMessageOptions == LogMessageDisplays(LogMessageDisplay::Default2)
+       || mMessageOptions == LogMessageDisplays(LogMessageDisplay::Default3))
+#else
+   if (mMessageOptions == LogMessageDisplay::Default || mMessageOptions == LogMessageDisplay::Default2
+       || mMessageOptions == LogMessageDisplay::Default3)
+#endif
    {
-      // TODO Add option for defining log message info order
-      text = QStringLiteral("%1 [%2][%3][%4]%5 %6")
-                 .arg(date.toString(kDateTimeFormat), levelToText(level), threadId, module, fileLine, message);
+      if (mMessageOptionsOrder == LogMessageDisplayOrder::DateTimeFirst)
+      {
+         text = QStringLiteral("%1 [%2][%3][%4]")
+                    .arg(date.toString(kDateTimeFormat), levelToText(level), threadId, module);
+      }
+      else
+      {
+         text = QStringLiteral("[%1][%2][%3][%4]")
+                    .arg(levelToText(level), module, QString::number(date.toSecsSinceEpoch()), threadId);
+      }
    }
-   // TODO Implement cases Default2, Default3
    else
    {
-      if (mMessageOptions.testFlag(LogMessageDisplay::DateTime))
+      // Custom
+      if (mMessageOptionsOrder == LogMessageDisplayOrder::DateTimeFirst)
       {
-         text.append(QString::fromLatin1("%1 ").arg(date.toString(kDateTimeFormat)));
-      }
-      if (mMessageOptions.testFlag(LogMessageDisplay::LogLevel))
-      {
-         text.append(QString::fromLatin1("[%1]").arg(levelToText(level)));
-      }
-      if (mMessageOptions.testFlag(LogMessageDisplay::ThreadId))
-      {
-         text.append(QString::fromLatin1("[%1]").arg(threadId));
-      }
-      if (mMessageOptions.testFlag(LogMessageDisplay::ModuleName))
-      {
-         text.append(QString::fromLatin1("[%1]").arg(module));
-      }
-      if (mMessageOptions.testFlag(LogMessageDisplay::Function) && !function.isEmpty())
-      {
-         text.append(QString::fromLatin1("{%1}").arg(function));
-      }
-      if (!fileLine.isEmpty())
-      {
-         if (fileLine.startsWith(QChar::Space))
+         if (mMessageOptions.testFlag(LogMessageDisplay::DateTime))
          {
-            fileLine = fileLine.right(1);
+            text.append(date.toString(kDateTimeFormat) + QChar::Space);
          }
-         text.append(fileLine);
-      }
-      if (mMessageOptions.testFlag(LogMessageDisplay::Message))
-      {
-         if (text.isEmpty() || text.endsWith(QChar::Space))
+         if (mMessageOptions.testFlag(LogMessageDisplay::LogLevel))
          {
-            text.append(QString::fromLatin1("%1").arg(message));
+            text.append(QStringLiteral("[%1]").arg(levelToText(level)));
          }
-         else
+         if (mMessageOptions.testFlag(LogMessageDisplay::ThreadId))
          {
-            text.append(QString::fromLatin1(" %1").arg(message));
+            text.append(QStringLiteral("[%1]").arg(threadId));
+         }
+         if (mMessageOptions.testFlag(LogMessageDisplay::ModuleName))
+         {
+            text.append(QStringLiteral("[%1]").arg(module));
          }
       }
+      else
+      {
+         if (mMessageOptions.testFlag(LogMessageDisplay::LogLevel))
+         {
+            text.append(QStringLiteral("[%1]").arg(levelToText(level)));
+         }
+         if (mMessageOptions.testFlag(LogMessageDisplay::ModuleName))
+         {
+            text.append(QStringLiteral("[%1]").arg(module));
+         }
+         if (mMessageOptions.testFlag(LogMessageDisplay::DateTime))
+         {
+            text.append(QStringLiteral("[%1]").arg(date.toSecsSinceEpoch()));
+         }
+         if (mMessageOptions.testFlag(LogMessageDisplay::ThreadId))
+         {
+            text.append(QStringLiteral("[%1]").arg(threadId));
+         }
+      }
+   }
+
+   if (mMessageOptions.testFlag(LogMessageDisplay::Function) && !function.isEmpty())
+   {
+      text.append(QStringLiteral("{%1}").arg(function));
+   }
+   if (!fileLine.isEmpty())
+   {
+      text.append(fileLine);
+   }
+   if (mMessageOptions.testFlag(LogMessageDisplay::Message))
+   {
+      text.append(text.isEmpty() || text.endsWith(QChar::Space) ? message : QChar::Space + message);
    }
 
    if (!mIsStop)

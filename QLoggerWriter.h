@@ -47,11 +47,14 @@ public:
     * @param fileFolderDestination The complete folder destination.
     * @param mode The logging mode.
     * @param fileSuffixIfFull The filename suffix if the file is full.
+    * @param messageOptions Specifies what elements are displayed in one line of log message.
+    * @param messageOrder Specifies the element order displayed in one line of log message.
     */
    explicit QLoggerWriter(const QString& fileDestination, LogLevel level = LogLevel::Warning,
                           const QString& fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
                           LogFileDisplay fileSuffixIfFull = LogFileDisplay::DateTime,
-                          LogMessageDisplays messageOptions = LogMessageDisplay::Default);
+                          LogMessageDisplays messageOptions = LogMessageDisplay::Default,
+                          LogMessageDisplayOrder messageOrder = LogMessageDisplayOrder::Default);
 
    /**
     * @brief Gets path and folder of the file that will store the logs.
@@ -113,6 +116,17 @@ public:
    void setMessageOptions(LogMessageDisplays messageOptions) { mMessageOptions = messageOptions; }
 
    /**
+    * @brief getMessageOptions Gets the current message options.
+    * @return The current options
+    */
+   LogMessageDisplayOrder getMessageOptionsOrder() const { return mMessageOptionsOrder; }
+   /**
+    * @brief setMessageOptions Specifies what elements are displayed in one line of log message.
+    * @param messageOptions The options
+    */
+   void setMessageOptionsOrder(LogMessageDisplayOrder messageOptionsOrder) { mMessageOptionsOrder = messageOptionsOrder; }
+
+   /**
     * @brief write Writes in the destination.
     * @details Within this method the message is written in the log file. If it would exceed
     * from mMaxFileSize, another file will be created and the log message will be stored in the
@@ -171,6 +185,10 @@ private:
     * @brief The current message options.
     */
    LogMessageDisplays mMessageOptions;
+   /**
+    * @brief The current message option's order.
+    */
+   LogMessageDisplayOrder mMessageOptionsOrder;
    /**
     * @brief Defines if the QLogWriter is currently stop and doesn't write to file
     */
