@@ -667,19 +667,4 @@ extern void QLog_(const QString& module, QLogger::LogLevel level, const QString&
 #      endif
 #   endif
 
-#   ifndef L_DEBUG_LogFinal
-#      define L_DEBUG_LogFinal(message)                                                                                \
-         if (this->children().isEmpty())                                                                               \
-         {                                                                                                             \
-            L_DEBUG_Log(message);                                                                                      \
-         }
-#   endif
-#   ifndef L_DEBUG_qLogFinal
-#      define L_DEBUG_qLogFinal(baseClass, message)                                                                    \
-         if (this->children().isEmpty())                                                                               \
-         {                                                                                                             \
-            L_DEBUG_qLog(baseClass, message);                                                                          \
-         }
-#   endif
-
 #endif // L_LOGGING_MACROS_QOBJECT
