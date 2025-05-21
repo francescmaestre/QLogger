@@ -152,10 +152,9 @@ void QLoggerManager::startWriter(const QString& module, QLoggerWriter* log, LogM
    }
 }
 
-void QLoggerManager::clearFileDestinationFolder(const QString& fileFolderDestination, int days)
+void QLoggerManager::clearFileDestinationFolder(const QString& fileFolderDestination, int days, const QString& fileExtension)
 {
-   QDir dir(fileFolderDestination + QStringLiteral("/logs"));
-
+   QDir dir(fileFolderDestination);
    if (!dir.exists())
    {
       return;
@@ -165,12 +164,14 @@ void QLoggerManager::clearFileDestinationFolder(const QString& fileFolderDestina
 
    const auto list = dir.entryInfoList();
    const auto now = QDateTime::currentDateTime();
+   const bool hasExtension = fileExtension.size() > 0;
 
    for (const auto& fileInfoIter : list)
    {
-      if (fileInfoIter.lastModified().daysTo(now) >= days)
+      if (fileInfoIter.lastModified().daysTo(now) >= days
+          && (!hasExtension || (hasExtension && fileInfoIter.completeSuffix() == fileExtension)))
       {
-         // remove file
+         // Remove file
          dir.remove(fileInfoIter.fileName());
       }
    }

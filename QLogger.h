@@ -105,8 +105,10 @@ public:
     * @param fileFolderDestination The destination folder.
     * @param days Minimum age of log files to delete. Logs older than
     *        this value will be removed. If days is -1, deletes any log file.
+    * @param fileExtension To specifies a particular type of file to remove. Empty string: remove all files.
     */
-   static void clearFileDestinationFolder(const QString& fileFolderDestination, int days = -1);
+   static void clearFileDestinationFolder(const QString& fileFolderDestination, int days = -1,
+                                          const QString& fileExtension=QString());
    /**
     * @brief Default QLogger settings for a command line app without log file.
     * @param level The default log level.
