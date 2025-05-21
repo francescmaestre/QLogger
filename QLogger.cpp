@@ -169,7 +169,7 @@ void QLoggerManager::clearFileDestinationFolder(const QString& fileFolderDestina
    for (const auto& fileInfoIter : list)
    {
       if (fileInfoIter.lastModified().daysTo(now) >= days
-          && (!hasExtension || (hasExtension && fileInfoIter.completeSuffix() == fileExtension)))
+          && (!hasExtension || (hasExtension && fileInfoIter.suffix() == fileExtension)))
       {
          // Remove file
          dir.remove(fileInfoIter.fileName());
