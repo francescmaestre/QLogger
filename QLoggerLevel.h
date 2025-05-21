@@ -35,6 +35,7 @@ namespace QLogger
  */
 enum class LogLevel
 {
+   Default = -1,
    Trace = 0,
    Debug,
    Info,
@@ -48,6 +49,7 @@ enum class LogLevel
  */
 enum class LogMode
 {
+   Default = -1,
    Disabled = 0,
    OnlyConsole,
    OnlyFile,
@@ -55,16 +57,18 @@ enum class LogMode
 };
 
 /**
- * @brief The LogFileDisplay enum class defines which elements are written in the log file name.
+ * @brief The LogFileDisplay enum class defines which suffix is set to the log file name
+ * in case the file is full.
  */
 enum class LogFileDisplay
 {
+   Default = -1,
    DateTime,
    Number
 };
 
 /**
- * @brief The LogTextDisplay enum class defines which elements are written by log message.
+ * @brief The LogTextDisplay enum class defines which elements are written per log message.
  */
 enum class LogMessageDisplay : unsigned int
 {
@@ -79,10 +83,22 @@ enum class LogMessageDisplay : unsigned int
 
    Default = LogLevel | ModuleName | DateTime | ThreadId | File | Line | Message,
    Default2 = LogLevel | ModuleName | DateTime | ThreadId | File | Function | Message,
+   Default3 = LogLevel | ModuleName | DateTime | ThreadId | Function | Message,
    Full = 0xFF
 };
 
 Q_DECLARE_FLAGS(LogMessageDisplays, LogMessageDisplay)
 Q_DECLARE_OPERATORS_FOR_FLAGS(LogMessageDisplays)
+
+/**
+ * @brief The LogMessageDisplayOrder enum class defines the element order written per log message.
+ * in case the file is full.
+ */
+enum class LogMessageDisplayOrder
+{
+   Default = -1,
+   LevelFirst, ///< The order is: [Level][Module][Date][ThreadId]{FileLine}{Function} message (Date as nb of secs)
+   DateTimeFirst ///< The order is: Date [Level][ThreadId][Module]{FileLine}{Function} message (Date as string)
+};
 
 }
