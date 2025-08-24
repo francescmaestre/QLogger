@@ -1,8 +1,7 @@
 file(GLOB SRC_FILES
-  *.cpp
-  *.h
+  src/*.cpp
+  include/*.h
 )
-
 
 add_library(QLogger STATIC
     ${SRC_FILES}
@@ -12,4 +11,5 @@ target_link_libraries(QLogger
     PUBLIC
     Qt::Core
 )
-target_include_directories(QLogger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_include_directories(QLogger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

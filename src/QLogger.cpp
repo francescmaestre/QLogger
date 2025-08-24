@@ -1,4 +1,4 @@
-#include "QLogger.h"
+#include <QLogger.h>
 
 #include "QLoggerWriter.h"
 
