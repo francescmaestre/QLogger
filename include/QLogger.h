@@ -22,7 +22,7 @@
  ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***************************************************************************************/
 
-#include <QLoggerLevel.h>
+#include <QLoggerTypes.h>
 
 #include <QMutex>
 #include <QMap>
@@ -203,9 +203,9 @@ private:
    LogMessageDisplays mDefaultMessageOptions = LogMessageDisplay::Default;
    QString mNewLogsFolder;
 
-/**
- * @brief Mutex to make the method thread-safe.
- */
+   /**
+    * @brief Mutex to make the method thread-safe.
+    */
    QRecursiveMutex mMutex;
 
    /**

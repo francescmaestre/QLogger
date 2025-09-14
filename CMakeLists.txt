@@ -1,5 +1,6 @@
 file(GLOB SRC_FILES
   src/*.cpp
+  src/*.h
   include/*.h
 )
 
