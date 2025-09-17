@@ -2,6 +2,7 @@ file(GLOB SRC_FILES
   src/*.cpp
   src/*.h
   include/*.h
+  include/QLogger
 )
 
 add_library(QLogger STATIC
