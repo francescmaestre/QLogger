@@ -73,7 +73,6 @@ enum class LogMessageDisplay : unsigned int
    File = 1 << 5,
    Line = 1 << 6,
    Message = 1 << 7,
-
    Default = LogLevel | ModuleName | DateTime | ThreadId | File | Line | Message,
    Default2 = LogLevel | ModuleName | DateTime | ThreadId | File | Function | Message,
    Full = 0xFF

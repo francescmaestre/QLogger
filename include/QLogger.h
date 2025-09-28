@@ -142,7 +142,6 @@ public:
    void setDefaultFileDestinationFolder(const QString &fileDestinationFolder);
    void setDefaultFileDestination(const QString &fileDestination) { mDefaultFileDestination = fileDestination; }
    void setDefaultFileSuffixIfFull(LogFileDisplay fileSuffixIfFull) { mDefaultFileSuffixIfFull = fileSuffixIfFull; }
-
    void setDefaultLevel(LogLevel level) { mDefaultLevel = level; }
    void setDefaultMode(LogMode mode) { mDefaultMode = mode; }
    void setDefaultMaxFileSize(int maxFileSize) { mDefaultMaxFileSize = maxFileSize; }
@@ -196,7 +195,6 @@ private:
    QString mDefaultFileDestinationFolder;
    QString mDefaultFileDestination;
    LogFileDisplay mDefaultFileSuffixIfFull = LogFileDisplay::DateTime;
-
    LogMode mDefaultMode = LogMode::OnlyFile;
    LogLevel mDefaultLevel = LogLevel::Warning;
    int mDefaultMaxFileSize = 1024 * 1024; //! @note 1Mio
@@ -230,7 +228,6 @@ private:
     */
    QLoggerWriter *createWriter(const QString &fileDest, LogLevel level, const QString &fileFolderDestination,
                                LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const;
-
    void startWriter(const QString &module, QLoggerWriter *log, LogMode mode, bool notify);
 
    /**
