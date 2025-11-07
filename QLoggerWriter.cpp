@@ -161,7 +161,7 @@ void QLoggerWriter::write(QVector<QString> messages)
 }
 
 void QLoggerWriter::enqueue(const QDateTime &date, const QString &threadId, const QString &module, LogLevel level,
-                            const QString &function, const QString &fileName, int line, const QString &message)
+                            const QString &function, const QString &fileName, int line, const QString &message, ListenerCallback callback)
 {
    QMutexLocker locker(&mutex);
 
@@ -217,6 +217,9 @@ void QLoggerWriter::enqueue(const QDateTime &date, const QString &threadId, cons
             text.append(QString(" %1").arg(message));
       }
    }
+
+   if (callback)
+       callback(text);
 
    text.append(QString::fromLatin1("\n"));
 

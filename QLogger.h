@@ -83,6 +83,17 @@ public:
                        const QString &fileFolderDestination = QString(), LogMode mode = LogMode::OnlyFile,
                        LogFileDisplay fileSuffixIfFull = LogFileDisplay::DateTime,
                        LogMessageDisplays messageOptions = LogMessageDisplay::Default, bool notify = true);
+
+   /**
+    * @brief addListener Injects a listener that will be notified for each message that fulfills all the filters.
+    * @param callback The callback where each new message will be sent.
+    * @param level Filters the level of the received messages.
+    * @return Returns the ID to unsbuscribe from the calls.
+    */
+   uint64_t addListener(ListenerCallback callback, LogLevel level = LogLevel::Debug);
+
+   void removeListener(uint64_t id);
+
    /**
     * @brief Clears old log files from the current storage folder.
     *
@@ -203,6 +214,10 @@ private:
    LogMessageDisplays mDefaultMessageOptions = LogMessageDisplay::Default;
    QString mNewLogsFolder;
 
+   QRecursiveMutex mCallbacksMutex;
+   QMap<uint64_t, ListenerCallback> mCallbacks;
+   uint64_t mListenerId = -1;
+
 /**
  * @brief Mutex to make the method thread-safe.
  */
@@ -243,6 +258,8 @@ private:
     * @param module The module to dequeue the messages from
     */
    void writeAndDequeueMessages(const QString &module);
+
+   void notifyListener(const QString& text);
 };
 
 /**

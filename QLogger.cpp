@@ -72,6 +72,31 @@ bool QLoggerManager::addDestination(const QString &fileDest, const QStringList &
    return allAdded;
 }
 
+uint64_t QLoggerManager::addListener(std::function<void (const QString &)> callback, LogLevel level)
+{
+    QMutexLocker lock(&mCallbacksMutex);
+
+    mCallbacks.insert(++mListenerId, std::move(callback));
+
+    return mListenerId;
+}
+
+void QLoggerManager::removeListener(uint64_t id)
+{
+    QMutexLocker lock(&mCallbacksMutex);
+    mCallbacks.remove(id);
+}
+
+void QLoggerManager::notifyListener(const QString& text)
+{
+    QMutexLocker lock(&mCallbacksMutex);
+
+    for (auto& callback : mCallbacks)
+    {
+        callback(text);
+    }
+}
+
 QLoggerWriter *QLoggerManager::createWriter(const QString &fileDest, LogLevel level,
                                             const QString &fileFolderDestination, LogMode mode,
                                             LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const
@@ -158,7 +183,9 @@ void QLoggerManager::writeAndDequeueMessages(const QString &module)
             const auto line = vals.at(5).toInt();
             const auto message = vals.at(6).toString();
 
-            logWriter->enqueue(datetime, threadId, module, level, function, file, line, message);
+            logWriter->enqueue(datetime, threadId, module, level, function, file, line, message, [this](const QString& text){
+                notifyListener(text);
+            });
          }
       }
 
@@ -180,7 +207,9 @@ void QLoggerManager::enqueueMessage(const QString &module, LogLevel level, const
 
       writeAndDequeueMessages(module);
 
-      logWriter->enqueue(QDateTime::currentDateTime(), threadId, module, level, function, fileName, line, message);
+      logWriter->enqueue(QDateTime::currentDateTime(), threadId, module, level, function, fileName, line, message, [this](const QString& text){
+          notifyListener(text);
+      });
    }
    else if (!logWriter && mNonWriterQueue.count(module) < QUEUE_LIMIT)
    {

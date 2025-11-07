@@ -36,7 +36,8 @@ class QLoggerWriter : public QThread
 {
    Q_OBJECT
 
-public:
+public:   
+
    /**
     * @brief Constructor that gets the complete path and filename to create the file. It also
     * configures the level of this file to filter the logs depending on the level.
@@ -120,7 +121,7 @@ public:
     * @param message The message to log.
     */
    void enqueue(const QDateTime &date, const QString &threadId, const QString &module, LogLevel level,
-                const QString &function, const QString &fileName, int line, const QString &message);
+                const QString &function, const QString &fileName, int line, const QString &message, ListenerCallback callback = nullptr);
 
    /**
     * @brief Stops the log writer

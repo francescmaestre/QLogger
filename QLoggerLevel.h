@@ -22,6 +22,7 @@
  ***************************************************************************************/
 
 #include <QtGlobal>
+#include <functional>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #   include <QFlags>
@@ -29,6 +30,8 @@
 
 namespace QLogger
 {
+
+using ListenerCallback = std::function<void(const QString&)>;
 
 /**
  * @brief The LogLevel enum class defines the level of the log message.
