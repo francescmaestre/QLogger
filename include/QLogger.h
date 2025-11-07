@@ -22,7 +22,7 @@
  ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***************************************************************************************/
 
-#include <QLoggerLevel.h>
+#include <QLoggerTypes.h>
 
 #include <QMutex>
 #include <QMap>
@@ -153,7 +153,6 @@ public:
    void setDefaultFileDestinationFolder(const QString &fileDestinationFolder);
    void setDefaultFileDestination(const QString &fileDestination) { mDefaultFileDestination = fileDestination; }
    void setDefaultFileSuffixIfFull(LogFileDisplay fileSuffixIfFull) { mDefaultFileSuffixIfFull = fileSuffixIfFull; }
-
    void setDefaultLevel(LogLevel level) { mDefaultLevel = level; }
    void setDefaultMode(LogMode mode) { mDefaultMode = mode; }
    void setDefaultMaxFileSize(int maxFileSize) { mDefaultMaxFileSize = maxFileSize; }
@@ -207,7 +206,6 @@ private:
    QString mDefaultFileDestinationFolder;
    QString mDefaultFileDestination;
    LogFileDisplay mDefaultFileSuffixIfFull = LogFileDisplay::DateTime;
-
    LogMode mDefaultMode = LogMode::OnlyFile;
    LogLevel mDefaultLevel = LogLevel::Warning;
    int mDefaultMaxFileSize = 1024 * 1024; //! @note 1Mio
@@ -218,14 +216,10 @@ private:
    QMap<uint64_t, ListenerCallback> mCallbacks;
    uint64_t mListenerId = -1;
 
-/**
- * @brief Mutex to make the method thread-safe.
- */
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-   QMutex mMutex { QMutex::Recursive };
-#else
+   /**
+    * @brief Mutex to make the method thread-safe.
+    */
    QRecursiveMutex mMutex;
-#endif
 
    /**
     * @brief Default builder of the class. It starts the thread.
@@ -249,7 +243,6 @@ private:
     */
    QLoggerWriter *createWriter(const QString &fileDest, LogLevel level, const QString &fileFolderDestination,
                                LogMode mode, LogFileDisplay fileSuffixIfFull, LogMessageDisplays messageOptions) const;
-
    void startWriter(const QString &module, QLoggerWriter *log, LogMode mode, bool notify);
 
    /**
