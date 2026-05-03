@@ -13,9 +13,8 @@ BasedOnStyle: WebKit
 
 Standard: Cpp11
 
-# Leave the line breaks up to the user.
-# Note that this may be changed at some point in the future.
-ColumnLimit: 0
+ColumnLimit: 120
+
 # How much weight do extra characters after the line length limit have.
 # PenaltyExcessCharacter: 4
 
@@ -60,7 +59,7 @@ NamespaceIndentation: None
 # Horizontally align arguments after an open bracket.
 # The coding style does not specify the following, but this is what gives
 # results closest to the existing code.
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: Align
 AlwaysBreakTemplateDeclarations: true
 
 # Ideally we should also allow less short function in a single line, but
@@ -74,21 +73,14 @@ AllowShortFunctionsOnASingleLine: Inline
 SortIncludes: false
 
 # macros for which the opening brace stays attached.
-ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH, forever, Q_FOREVER, QBENCHMARK, QBENCHMARK_ONCE ]
+ForEachMacros: [ foreach, Q_FOREACH, BOOST_FOREACH, forever, Q_FOREVER, QBENCHMARK, QBENCHMARK_ONCE ]
 
 IndentCaseLabels: true
 
 IndentPPDirectives: AfterHash
-
-AlignAfterOpenBracket: Align
 
 AccessModifierOffset: -3
 
 IndentWidth: 3
 
 #StatementMacros ['Q_OBJECT', 'Q_UNUSED']
-
-ColumnLimit: 120
-
-
-
